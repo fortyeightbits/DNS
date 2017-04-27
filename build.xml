@@ -34,6 +34,12 @@
                 <javac srcdir="${src.dir}" destdir="${build.dir}">
                         <classpath refid="junit.class.path" />
                 </javac>
+    		<mkdir dir="${build.dir}/jar"/>
+            	<jar destfile="${build.dir}/jar/main.jar" basedir="${build.dir}">
+            		   <manifest>
+            		      <attribute name = "Main-Class" value = "edu.wisc.cs.sdn.simpledns"/>
+            		   </manifest>
+            	</jar>
 
         </target>
 
