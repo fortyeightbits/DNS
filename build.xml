@@ -37,11 +37,24 @@
     		<mkdir dir="${build.dir}/jar"/>
             	<jar destfile="${build.dir}/jar/main.jar" basedir="${build.dir}">
             		   <manifest>
-            		      <attribute name = "Main-Class" value = "edu.wisc.cs.sdn.simpledns"/>
+            		      <attribute name = "Main-Class" value = "edu.wisc.cs.sdn.simpledns.SimpleDNS"/>
             		   </manifest>
             	</jar>
 
         </target>
+	
+		<!-- Compiles and runs code -->
+		<target name="run" depends="compile">
+		   <java fork="true" classname="edu.wisc.cs.sdn.simpledns.SimpleDNS">
+		   	<classpath>
+		   	<path location="${build.dir}/jar/main.jar"/>
+		   	</classpath>
+		      <arg value="-r"/>
+		      <arg value="100.100.100.100"/>
+		      <arg value="-e"/>
+			  <arg value="ec2.csv"/>
+		   </java>
+		</target>
 
         <!-- Run the JUnit Tests -->
         <!-- Output is XML, could also be plain-->

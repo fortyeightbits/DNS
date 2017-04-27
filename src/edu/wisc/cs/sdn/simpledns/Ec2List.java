@@ -49,15 +49,6 @@ class Ec2List
 		
 			// Close the opened reader when reads are complete
 			bufferedReader.close();
-			
-			// Test code to ensure list is populated correctly:
-			for (IPelement i : elementList)
-			{
-				System.out.println("=========================");
-				System.out.println(i.regionName);
-				System.out.println(i.ip);
-				System.out.println(i.ipMask);
-			}
 		}
 		catch (FileNotFoundException e)
 		{
@@ -67,8 +58,6 @@ class Ec2List
 		{
 			e.printStackTrace();
 		}
-		
-		
 	}
 	
 	protected int ipStringToInt(String ipAddress)
