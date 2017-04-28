@@ -8,7 +8,7 @@ import java.util.LinkedList;
 
 import edu.wisc.cs.sdn.simpledns.packet.DNSRdataString;
 
-class Ec2List
+public class Ec2List
 {
 	// Members:
 	public LinkedList<IPelement> elementList;
@@ -40,7 +40,7 @@ class Ec2List
 				
 				// Handle the IP and mask.
 				String [] ipStrings = ec2_data[0].split("/");
-				elementToFill.ip = ipStringToInt(ipStrings[0]);
+				elementToFill.ip = SimpleDNS.ipStringToInt(ipStrings[0]);
 				elementToFill.setIpMask(Integer.valueOf(ipStrings[1]));
 				
 				// After we've completed filling the element, add to the list
@@ -58,27 +58,6 @@ class Ec2List
 		{
 			e.printStackTrace();
 		}
-	}
-	
-	protected int ipStringToInt(String ipAddress)
-	{
-        if (ipAddress == null)
-            throw new IllegalArgumentException("Specified IPv4 address must" +
-                "contain 4 sets of numerical digits separated by periods");
-        String[] octets = ipAddress.split("\\.");
-        if (octets.length != 4)
-            throw new IllegalArgumentException("Specified IPv4 address must" +
-                "contain 4 sets of numerical digits separated by periods");
-
-        int result = 0;
-        for (int i = 0; i < 4; ++i) {
-            int oct = Integer.valueOf(octets[i]);
-            if (oct > 255 || oct < 0)
-                throw new IllegalArgumentException("Octet values in specified" +
-                        " IPv4 address must be 0 <= value <= 255");
-            result |=  oct << ((3-i)*8);
-        }
-        return result;
 	}
 	
 	public DNSRdataString searchForIp(int ipToSearchFor)

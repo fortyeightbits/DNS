@@ -1,6 +1,6 @@
 package edu.wisc.cs.sdn.simpledns;
 
-class IPelement
+public class IPelement
 {
 	// Constructor
 	public IPelement()
