@@ -32,15 +32,22 @@ public class StateContext
 		{
 		case STATE_RECEIVE_PACKET:
 			currentState = stateList.get(0);
+			break;
 		case STATE_PROCESS_PACKET:
 			currentState = stateList.get(1);
+			break;
 		case STATE_REQUEST_OTHER:
 			currentState = stateList.get(2);
+			break;
 		case STATE_PROCESS_REQUEST:
 			currentState = stateList.get(3);
+			break;
 		case STATE_CHECK_EC2:
 			currentState = stateList.get(4);
+			break;
 		}
+		
+		return;
 	}
 	
 	public void runCurrentState()

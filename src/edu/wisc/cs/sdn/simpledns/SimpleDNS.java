@@ -34,6 +34,9 @@ public class SimpleDNS
 		
 		StateProcessRequest stateProcessRequest = new StateProcessRequest();
 		stateList.add(stateProcessRequest);
+		
+		StateCheckEc2 stateCheckEc2 = new StateCheckEc2();
+		stateList.add(stateCheckEc2);
 			
 		StateContext mainContext = new StateContext(stateList, stateReceivePacket);
 		
