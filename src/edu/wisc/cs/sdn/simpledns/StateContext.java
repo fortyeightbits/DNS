@@ -1,6 +1,10 @@
 package edu.wisc.cs.sdn.simpledns;
 
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.util.LinkedList;
+
+import edu.wisc.cs.sdn.simpledns.packet.DNS;
 
 public class StateContext
 {
@@ -8,6 +12,11 @@ public class StateContext
 	{
 		stateList = states;
 		currentState = startingState;
+		
+		buffer = new byte[512];
+		dataPacket = new DatagramPacket(buffer, 512);
+		dnsClientToServer  = new DNS();
+		dnsRemoteToServer = new DNS();
 		// Tell all states that you're the controller:
 		for (State selectedState : states)
 		{
@@ -22,8 +31,15 @@ public class StateContext
 
 	//Members
 	protected LinkedList<State> stateList;
-	
 	protected State currentState;
+	
+	// Data to pass between states:
+	public byte [] buffer;
+	public DatagramPacket dataPacket;
+	public DNS dnsClientToServer;
+	public DatagramSocket hostOutSocket;
+	public DNS dnsRemoteToServer;
+	
 	
 	// Methods
 	public void proceedToNextState(StateEnumTypes nextState)

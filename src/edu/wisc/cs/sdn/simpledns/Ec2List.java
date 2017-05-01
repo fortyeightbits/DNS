@@ -64,6 +64,17 @@ public class Ec2List
 	{
 		DNSRdataString retVal = new DNSRdataString();
 		
+		for (IPelement entry : elementList)
+		{
+			// & with mask to check if it's within range. If it is, it will match IP.
+			if ((ipToSearchFor & entry.ipMask) == entry.ip)
+			{
+				retVal.setString(entry.regionName + "-" + entry.ip);
+				break;
+			}
+			
+		}
+		
 		return retVal;
 	}
 }

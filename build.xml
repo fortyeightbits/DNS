@@ -50,7 +50,7 @@
 		   	<path location="${build.dir}/jar/main.jar"/>
 		   	</classpath>
 		      <arg value="-r"/>
-		      <arg value="100.100.100.100"/>
+		      <arg value="198.41.0.4"/>
 		      <arg value="-e"/>
 			  <arg value="ec2.csv"/>
 		   </java>

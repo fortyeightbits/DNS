@@ -1,5 +1,8 @@
 package edu.wisc.cs.sdn.simpledns;
+import java.util.List;
 
+import edu.wisc.cs.sdn.simpledns.packet.DNS;
+import edu.wisc.cs.sdn.simpledns.packet.DNSQuestion;
 
 public class StateProcessPacket extends State
 {
@@ -9,9 +12,20 @@ public class StateProcessPacket extends State
 	{
 		System.out.println("StateProcessPacket");
 		
-		contextControl.proceedToNextState(StateEnumTypes.STATE_REQUEST_OTHER);
+		// Deserialize and store dns packet
+		contextControl.dnsClientToServer = DNS.deserialize(contextControl.dataPacket.getData(), contextControl.dataPacket.getLength());
+		
+		System.out.println(contextControl.dnsClientToServer.toString());
+//		contextControl.proceedToNextState(StateEnumTypes.STATE_RECEIVE_PACKET);
+		if (contextControl.dnsClientToServer.getOpcode() != 0)
+		{
+			contextControl.proceedToNextState(StateEnumTypes.STATE_RECEIVE_PACKET);
+		}
+		else
+		{
+			contextControl.proceedToNextState(StateEnumTypes.STATE_REQUEST_OTHER);
+		}
 	}
-	
 	
 	
 }

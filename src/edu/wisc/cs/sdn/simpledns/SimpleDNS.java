@@ -29,13 +29,13 @@ public class SimpleDNS
 		StateProcessPacket stateProcessPacket = new StateProcessPacket();
 		stateList.add(stateProcessPacket);
 		
-		StateRequestOther stateRequestOther = new StateRequestOther(SimpleDNS.ipStringToInt(rootServerIP));
+		StateRequestOther stateRequestOther = new StateRequestOther(SimpleDNS.ipStringToBytes(rootServerIP));
 		stateList.add(stateRequestOther);
 		
 		StateProcessRequest stateProcessRequest = new StateProcessRequest();
 		stateList.add(stateProcessRequest);
 		
-		StateCheckEc2 stateCheckEc2 = new StateCheckEc2();
+		StateCheckEc2 stateCheckEc2 = new StateCheckEc2(ec2);
 		stateList.add(stateCheckEc2);
 			
 		StateContext mainContext = new StateContext(stateList, stateReceivePacket);
@@ -65,6 +65,20 @@ public class SimpleDNS
                 throw new IllegalArgumentException("Octet values in specified" +
                         " IPv4 address must be 0 <= value <= 255");
             result |=  oct << ((3-i)*8);
+        }
+        return result;
+	}
+	
+	public static byte[] ipStringToBytes(String ipAddress)
+	{
+        String[] octets = ipAddress.split("\\.");
+        if (octets.length != 4)
+            throw new IllegalArgumentException("Specified IPv4 address must" +
+                "contain 4 sets of numerical digits separated by periods");
+
+        byte[] result = new byte[4];
+        for (int i = 0; i < 4; ++i) {
+            result[i] = Integer.valueOf(octets[i]).byteValue();
         }
         return result;
 	}
