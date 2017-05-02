@@ -61,7 +61,6 @@ public class StateCheckEc2 extends State
 			DatagramPacket packetToClient = new DatagramPacket(contextControl.dnsRemoteToServer.serialize(), contextControl.dnsRemoteToServer.getLength(), clientAddress, clientPort);
 			socketToClient.send(packetToClient);
 			socketToClient.close();
-			System.out.println(SimpleDNS.ipStringToInt("192.5.6.30"));
 		}
 		catch (SocketException e) 
 		{
@@ -81,7 +80,7 @@ public class StateCheckEc2 extends State
 //		}
 		
 		
-		
+		contextControl.resetIpToQuery();
 		contextControl.proceedToNextState(StateEnumTypes.STATE_RECEIVE_PACKET);
 	}
 	

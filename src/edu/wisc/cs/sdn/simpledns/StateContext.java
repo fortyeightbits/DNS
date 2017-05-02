@@ -17,6 +17,8 @@ public class StateContext
 		dataPacket = new DatagramPacket(buffer, 512);
 		dnsClientToServer  = new DNS();
 		dnsRemoteToServer = new DNS();
+		dnsPacketBuffer = new DNS();
+		
 		// Tell all states that you're the controller:
 		for (State selectedState : states)
 		{
@@ -39,6 +41,8 @@ public class StateContext
 	public DNS dnsClientToServer;
 	public DatagramSocket hostOutSocket;
 	public DNS dnsRemoteToServer;
+	
+	protected DNS dnsPacketBuffer;
 	
 	
 	// Methods
@@ -70,6 +74,29 @@ public class StateContext
 	{
 		currentState.runState();
 	}
+	
+	public void copyToDnsPacketBuffer(DNS dnsIn)
+	{
+		dnsPacketBuffer = DNS.deserialize(dnsIn.serialize(), dnsIn.getLength());
+	}
+	
+	public DNS getDnsPacketBuffer()
+	{
+		return dnsPacketBuffer;
+	}
+	
+	public void setIpToQuery(int i)
+	{
+		StateRequestOther requestState = ((StateRequestOther)stateList.get(2));
+		requestState.setCurrentServerIp(SimpleDNS.ipStringToBytes(SimpleDNS.fromIPv4Address(i)));
+	}
+	
+	public void resetIpToQuery()
+	{
+		StateRequestOther requestState = ((StateRequestOther)stateList.get(2));
+		requestState.resetRemoteIp();
+	}
+	
 	
 //	STATE_RECEIVE_PACKET,
 //	STATE_PROCESS_PACKET,
