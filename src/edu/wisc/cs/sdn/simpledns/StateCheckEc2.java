@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import edu.wisc.cs.sdn.simpledns.packet.DNS;
+import edu.wisc.cs.sdn.simpledns.packet.DNSRdataString;
 import edu.wisc.cs.sdn.simpledns.packet.DNSResourceRecord;
 
 public class StateCheckEc2 extends State
@@ -20,11 +21,16 @@ public class StateCheckEc2 extends State
 		System.out.println("StateCheckEc2");
 		
 		// Get the last answer:
-		ArrayList<DNSResourceRecord> answerList = (ArrayList<DNSResourceRecord>)(contextControl.dnsRemoteToServer.getAnswers());
+		ArrayList<DNSResourceRecord> authorityList = (ArrayList<DNSResourceRecord>)(contextControl.dnsRemoteToServer.getAuthorities());
 
-		for (DNSResourceRecord record : answerList)
+		for (DNSResourceRecord record : authorityList)
 		{
-			System.out.println(record.toString());
+			DNSRdataString dataString = list.searchForIp(SimpleDNS.ipStringToInt(record.getData().toString()));
+			if (dataString.getLength() != 0)
+			{
+				// Add records and stuff
+				contextControl.dnsRemoteToServer.addAnswer(dataString);
+			}
 		}
 		
 		

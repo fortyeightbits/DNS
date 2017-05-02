@@ -1,6 +1,7 @@
 package edu.wisc.cs.sdn.simpledns;
 
 import java.io.IOException;
+import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -31,12 +32,18 @@ public class StateRequestOther extends State
 		{	
 //			System.out.println(InetAddress.getByAddress(currentServerIp).toString());
 			DatagramSocket socketOut = new DatagramSocket(53);
-//			InetAddress add = InetAddress.getByAddress(currentServerIp);
+			InetAddress add = InetAddress.getByAddress(currentServerIp);
 //			InetSocketAddress sockAdd = new InetSocketAddress(add, 53);
 //			socketOut.bind(sockAdd);
-			contextControl.hostOutSocket = socketOut;
-			contextControl.dataPacket.setAddress(InetAddress.getByAddress(currentServerIp));
-			socketOut.send(contextControl.dataPacket);
+//			contextControl.hostOutSocket = socketOut;
+			
+			contextControl.dnsClientToServer.setQuery(true);
+//			System.out.println("THis is what we're sending out: " + contextControl.dnsClientToServer.toString());
+			DatagramPacket dataOut = new DatagramPacket(contextControl.dnsClientToServer.serialize(), contextControl.dnsClientToServer.getLength(), add, 53);
+			dataOut.setAddress(InetAddress.getByAddress(currentServerIp));
+			socketOut.send(dataOut);
+			
+			socketOut.close();
 		} 
 		catch (SocketException e) 
 		{

@@ -2,6 +2,7 @@ package edu.wisc.cs.sdn.simpledns;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 
 import edu.wisc.cs.sdn.simpledns.packet.DNS;
 
@@ -16,16 +17,18 @@ public class StateProcessRequest extends State
 		DatagramPacket localPacket = new DatagramPacket(localBuffer, 512);
 		try 
 		{
-			contextControl.hostOutSocket.receive(localPacket);
+			DatagramSocket socketOut = new DatagramSocket(53);
+			socketOut.receive(localPacket);
 			contextControl.dnsRemoteToServer = DNS.deserialize(localPacket.getData(), localPacket.getLength());
 			System.out.println(contextControl.dnsRemoteToServer.toString());
+			socketOut.close();
 		} 
 		catch (IOException e) 
 		{
+			System.out.println("IOException! Unable to send out!");
 			e.printStackTrace();
 		}
 		
-		contextControl.hostOutSocket.close();
 		
 		// Handle depending on recursion
 		if (contextControl.dnsClientToServer.isRecursionDesired())
