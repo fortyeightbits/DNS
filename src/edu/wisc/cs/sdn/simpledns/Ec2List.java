@@ -64,13 +64,21 @@ public class Ec2List
 	{
 		DNSRdataString retVal = new DNSRdataString();
 		
+//		int numberToShift = 32 - 24;
+//		int ipMask = Integer.MAX_VALUE << numberToShift;
+//		System.out.println(SimpleDNS.fromIPv4Address(ipToSearchFor & ipMask));
 		for (IPelement entry : elementList)
 		{
 			// & with mask to check if it's within range. If it is, it will match IP.
-			if ((ipToSearchFor & entry.ipMask) == entry.ip)
+			if ((ipToSearchFor & entry.ipMask) == (entry.ip & entry.ipMask))
 			{
-				retVal.setString(entry.regionName + "-" + entry.ip);
+				retVal.setString(entry.regionName + "-" + SimpleDNS.fromIPv4Address(entry.ip));
+				System.out.println("I found IP in ec2 region!");
 				break;
+			}
+			else
+			{
+				retVal.setString("");
 			}
 			
 		}
