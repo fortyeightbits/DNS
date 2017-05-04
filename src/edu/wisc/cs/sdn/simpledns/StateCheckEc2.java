@@ -7,8 +7,11 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 import edu.wisc.cs.sdn.simpledns.packet.DNS;
+import edu.wisc.cs.sdn.simpledns.packet.DNSQuestion;
 import edu.wisc.cs.sdn.simpledns.packet.DNSRdataString;
 import edu.wisc.cs.sdn.simpledns.packet.DNSResourceRecord;
 
@@ -55,6 +58,15 @@ public class StateCheckEc2 extends State
 		System.out.println("ClientAdd: "+clientAddress.toString());
 		try 
 		{
+			if (contextControl.hasCnameRecord)
+			{
+				System.out.println("There's a CNAME record on file!!!!");
+				contextControl.dnsRemoteToServer.addAnswer(contextControl.getCNameRecord());
+				List<DNSQuestion> questionList = new LinkedList<DNSQuestion>();
+				questionList.add(contextControl.getQuestion());
+				
+				contextControl.dnsRemoteToServer.setQuestions(questionList);
+			}
 			System.out.println("Before returning to client, packet looks like this:");
 			System.out.println(contextControl.dnsRemoteToServer.toString());
 			DatagramSocket socketToClient = new DatagramSocket(SimpleDNS.dnsPort);
@@ -79,7 +91,7 @@ public class StateCheckEc2 extends State
 //			
 //		}
 		
-		
+		contextControl.resetCnameRecord();
 		contextControl.resetIpToQuery();
 		contextControl.proceedToNextState(StateEnumTypes.STATE_RECEIVE_PACKET);
 	}

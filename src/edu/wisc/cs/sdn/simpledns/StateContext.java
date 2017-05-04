@@ -2,9 +2,12 @@ package edu.wisc.cs.sdn.simpledns;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.nio.ByteBuffer;
 import java.util.LinkedList;
 
 import edu.wisc.cs.sdn.simpledns.packet.DNS;
+import edu.wisc.cs.sdn.simpledns.packet.DNSQuestion;
+import edu.wisc.cs.sdn.simpledns.packet.DNSResourceRecord;
 
 public class StateContext
 {
@@ -19,6 +22,10 @@ public class StateContext
 		dnsClientToServer  = new DNS();
 		dnsRemoteToServer = new DNS();
 		dnsPacketBuffer = new DNS();
+		
+		cNameRecord = new DNSResourceRecord();
+		dnsQuestion = new DNSQuestion();
+		hasCnameRecord = false;
 		
 		// Tell all states that you're the controller:
 		for (State selectedState : states)
@@ -46,6 +53,10 @@ public class StateContext
 	
 	protected DNS dnsPacketBuffer;
 	
+	// Cname data:
+	private DNSResourceRecord cNameRecord;
+	private DNSQuestion dnsQuestion;
+	public boolean hasCnameRecord;
 	
 	// Methods
 	public void proceedToNextState(StateEnumTypes nextState)
@@ -107,6 +118,30 @@ public class StateContext
 	public String getExitString()
 	{
 		return exitString;
+	}
+	
+	public void setCNameRecord(DNSResourceRecord cname, DNSQuestion question)
+	{
+		hasCnameRecord = true;
+		cNameRecord = cname;
+		dnsQuestion = DNSQuestion.deserialize(ByteBuffer.wrap(question.serialize()));
+	}
+	
+	public DNSResourceRecord getCNameRecord()
+	{
+		return cNameRecord;
+	}
+	
+	public DNSQuestion getQuestion()
+	{
+		return dnsQuestion;
+	}
+	
+	public void resetCnameRecord()
+	{
+		hasCnameRecord = false;
+		cNameRecord = new DNSResourceRecord();
+		dnsQuestion = new DNSQuestion();
 	}
 	
 //	STATE_RECEIVE_PACKET,

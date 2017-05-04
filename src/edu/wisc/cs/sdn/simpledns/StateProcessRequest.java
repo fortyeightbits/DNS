@@ -11,7 +11,6 @@ import edu.wisc.cs.sdn.simpledns.packet.DNSResourceRecord;
 
 public class StateProcessRequest extends State
 {
-
 	@Override
 	public void runState() 
 	{
@@ -40,47 +39,53 @@ public class StateProcessRequest extends State
 			if (!isRecursionComplete())
 			{
 	//			System.out.println("RECURSION IS DESIREDDD!!!!!!");
-				boolean isTypeAFound = false;
-				// recurse on A:
-				List<DNSResourceRecord> additionalList = contextControl.dnsRemoteToServer.getAdditional();
-
-				for (DNSResourceRecord aEntry : additionalList)
+				boolean hasCname = false;
+				contextControl.copyToDnsPacketBuffer(contextControl.dnsClientToServer);
+				List<DNSResourceRecord> answerList = contextControl.dnsRemoteToServer.getAnswers();
+				// Check for CNAME
+				for (DNSResourceRecord answerRecord : answerList)
 				{
-					if (aEntry.getType() == DNS.TYPE_A)
+					if (answerRecord.getType() == DNS.TYPE_CNAME)
 					{
-						contextControl.setIpToQuery(SimpleDNS.ipStringToInt(aEntry.getData().toString()));
-						contextControl.copyToDnsPacketBuffer(contextControl.dnsClientToServer);
+						System.out.println("CNAME FOUND!!!");
+						// Set the question to send out cname if cname is found
+						List<DNSQuestion> existingQuestions = contextControl.getDnsPacketBuffer().getQuestions();
+						DNSQuestion cnameQuestion = existingQuestions.get(0);
+						contextControl.setCNameRecord(answerRecord, cnameQuestion);
+						cnameQuestion.setName(answerRecord.getData().toString());
+						
+						contextControl.getDnsPacketBuffer().setQuestions(existingQuestions);
+						contextControl.dnsClientToServer.setQuestions(existingQuestions);
+						contextControl.setExitString(answerRecord.getData().toString());
+//							contextControl.setIpToQuery(contextControl.);
+//							
 						contextControl.proceedToNextState(StateEnumTypes.STATE_REQUEST_OTHER);
-						isTypeAFound = true;
+						hasCname = true;
 						break;
 					}
 				}
 				
-				if (!isTypeAFound)
+				if (!hasCname)
 				{
-					List<DNSResourceRecord> answerList = contextControl.dnsRemoteToServer.getAnswers();
-					// Check for CNAME
-					for (DNSResourceRecord answerRecord : answerList)
+					// recurse on A:
+					List<DNSResourceRecord> additionalList = contextControl.dnsRemoteToServer.getAdditional();
+	
+					for (DNSResourceRecord aEntry : additionalList)
 					{
-						if (answerRecord.getType() == DNS.TYPE_CNAME)
+						if (aEntry.getType() == DNS.TYPE_A)
 						{
-							// Set the question to send out cname if cname is found
-							contextControl.copyToDnsPacketBuffer(contextControl.dnsClientToServer);
-							List<DNSQuestion> existingQuestions = contextControl.getDnsPacketBuffer().getQuestions();
-							DNSQuestion cnameQuestion = existingQuestions.get(0);
-							System.out.println("New name: " + answerRecord.getData().toString());
-							cnameQuestion.setName(answerRecord.getData().toString());
-							
-							contextControl.getDnsPacketBuffer().setQuestions(existingQuestions);
-							contextControl.setExitString(answerRecord.getName());
+//							List<DNSQuestion> existingQuestions = contextControl.getDnsPacketBuffer().getQuestions();
+//							DNSQuestion cnameQuestion = existingQuestions.get(0);
+//							cnameQuestion.setName(contextControl.getExitString());
 //							
-////							contextControl.setIpToQuery(SimpleDNS.ipStringToInt(aEntry.getData().toString()));
-//							
+//							contextControl.getDnsPacketBuffer().setQuestions(existingQuestions);
+							contextControl.setIpToQuery(SimpleDNS.ipStringToInt(aEntry.getData().toString()));
 							contextControl.proceedToNextState(StateEnumTypes.STATE_REQUEST_OTHER);
+	
 							break;
 						}
 					}
-				}				
+				}
 			}
 			else
 			{
