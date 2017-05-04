@@ -23,6 +23,7 @@ public class StateProcessPacket extends State
 		}
 		else
 		{
+			contextControl.setExitString(contextControl.dnsClientToServer.getQuestions().get(0).getName());
 			contextControl.copyToDnsPacketBuffer(contextControl.dnsClientToServer);
 			contextControl.proceedToNextState(StateEnumTypes.STATE_REQUEST_OTHER);
 		}

@@ -14,6 +14,7 @@ public class StateContext
 		currentState = startingState;
 		
 		buffer = new byte[512];
+		exitString = new String();
 		dataPacket = new DatagramPacket(buffer, 512);
 		dnsClientToServer  = new DNS();
 		dnsRemoteToServer = new DNS();
@@ -36,6 +37,7 @@ public class StateContext
 	protected State currentState;
 	
 	// Data to pass between states:
+	private String exitString;
 	public byte [] buffer;
 	public DatagramPacket dataPacket;
 	public DNS dnsClientToServer;
@@ -97,6 +99,15 @@ public class StateContext
 		requestState.resetRemoteIp();
 	}
 	
+	public void setExitString(String exit)
+	{
+		exitString = exit;
+	}
+	
+	public String getExitString()
+	{
+		return exitString;
+	}
 	
 //	STATE_RECEIVE_PACKET,
 //	STATE_PROCESS_PACKET,

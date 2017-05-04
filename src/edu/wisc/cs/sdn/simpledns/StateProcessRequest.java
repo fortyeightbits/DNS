@@ -16,8 +16,8 @@ public class StateProcessRequest extends State
 	public void runState() 
 	{
 		System.out.println("StateProcessRequest");
-		byte[] localBuffer = new byte[512];
-		DatagramPacket localPacket = new DatagramPacket(localBuffer, 512);
+		byte[] localBuffer = new byte[1024];
+		DatagramPacket localPacket = new DatagramPacket(localBuffer, localBuffer.length);
 		try 
 		{
 			DatagramSocket socketOut = new DatagramSocket(53);
@@ -40,24 +40,7 @@ public class StateProcessRequest extends State
 			if (!isRecursionComplete())
 			{
 	//			System.out.println("RECURSION IS DESIREDDD!!!!!!");
-				List<DNSResourceRecord> answerList = contextControl.dnsRemoteToServer.getAnswers();
-				
-				// Check for CNAME
-				for (DNSResourceRecord answerRecord : answerList)
-				{
-					if (answerRecord.getType() == DNS.TYPE_CNAME)
-					{
-						// Set the question to send out cname if cname is found
-						contextControl.copyToDnsPacketBuffer(contextControl.dnsClientToServer);
-						List<DNSQuestion> existingQuestions = contextControl.getDnsPacketBuffer().getQuestions();
-						DNSQuestion cnameQuestion = existingQuestions.get(0);
-						cnameQuestion.setName(answerRecord.getName());
-						
-						contextControl.getDnsPacketBuffer().setQuestions(existingQuestions);
-						break;
-					}
-				}
-				
+				boolean isTypeAFound = false;
 				// recurse on A:
 				List<DNSResourceRecord> additionalList = contextControl.dnsRemoteToServer.getAdditional();
 
@@ -68,12 +51,36 @@ public class StateProcessRequest extends State
 						contextControl.setIpToQuery(SimpleDNS.ipStringToInt(aEntry.getData().toString()));
 						contextControl.copyToDnsPacketBuffer(contextControl.dnsClientToServer);
 						contextControl.proceedToNextState(StateEnumTypes.STATE_REQUEST_OTHER);
+						isTypeAFound = true;
 						break;
 					}
 				}
-
 				
-				
+				if (!isTypeAFound)
+				{
+					List<DNSResourceRecord> answerList = contextControl.dnsRemoteToServer.getAnswers();
+					// Check for CNAME
+					for (DNSResourceRecord answerRecord : answerList)
+					{
+						if (answerRecord.getType() == DNS.TYPE_CNAME)
+						{
+							// Set the question to send out cname if cname is found
+							contextControl.copyToDnsPacketBuffer(contextControl.dnsClientToServer);
+							List<DNSQuestion> existingQuestions = contextControl.getDnsPacketBuffer().getQuestions();
+							DNSQuestion cnameQuestion = existingQuestions.get(0);
+							System.out.println("New name: " + answerRecord.getData().toString());
+							cnameQuestion.setName(answerRecord.getData().toString());
+							
+							contextControl.getDnsPacketBuffer().setQuestions(existingQuestions);
+							contextControl.setExitString(answerRecord.getName());
+//							
+////							contextControl.setIpToQuery(SimpleDNS.ipStringToInt(aEntry.getData().toString()));
+//							
+							contextControl.proceedToNextState(StateEnumTypes.STATE_REQUEST_OTHER);
+							break;
+						}
+					}
+				}				
 			}
 			else
 			{
@@ -91,13 +98,12 @@ public class StateProcessRequest extends State
 	public boolean isRecursionComplete()
 	{
 		boolean retVal = false;
-		DNSQuestion question = contextControl.dnsClientToServer.getQuestions().get(0);
-		String name = question.getName();
+		String name = contextControl.getExitString();
 		
 		// Check for end of recursion
 		for (DNSResourceRecord record : contextControl.dnsRemoteToServer.getAnswers())
 		{
-			if(record.getName().equals(name))
+			if(record.getName().equals(name) && ((record.getType() == DNS.TYPE_A)||(record.getType() == DNS.TYPE_AAAA)))
 			{
 				retVal = true;
 				break;
