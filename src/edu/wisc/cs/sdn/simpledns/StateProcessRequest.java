@@ -49,17 +49,25 @@ public class StateProcessRequest extends State
 					{
 						System.out.println("CNAME FOUND!!!");
 						// Set the question to send out cname if cname is found
-						List<DNSQuestion> existingQuestions = contextControl.getDnsPacketBuffer().getQuestions();
-						DNSQuestion cnameQuestion = existingQuestions.get(0);
-						contextControl.setCNameRecord(answerRecord, cnameQuestion);
-						cnameQuestion.setName(answerRecord.getData().toString());
-						
-						contextControl.getDnsPacketBuffer().setQuestions(existingQuestions);
-						contextControl.dnsClientToServer.setQuestions(existingQuestions);
-						contextControl.setExitString(answerRecord.getData().toString());
+						if (contextControl.dnsRemoteToServer.getQuestions().get(0).getType() == DNS.TYPE_CNAME)
+						{
+							// If we're asking for a cname, we're done!
+							contextControl.proceedToNextState(StateEnumTypes.STATE_CHECK_EC2);
+						}
+						else
+						{
+							List<DNSQuestion> existingQuestions = contextControl.getDnsPacketBuffer().getQuestions();
+							DNSQuestion cnameQuestion = existingQuestions.get(0);
+							contextControl.setCNameRecord(answerRecord, cnameQuestion);
+							cnameQuestion.setName(answerRecord.getData().toString());
+							
+							contextControl.getDnsPacketBuffer().setQuestions(existingQuestions);
+							contextControl.dnsClientToServer.setQuestions(existingQuestions);
+							contextControl.setExitString(answerRecord.getData().toString());
 //							contextControl.setIpToQuery(contextControl.);
 //							
-						contextControl.proceedToNextState(StateEnumTypes.STATE_REQUEST_OTHER);
+							contextControl.proceedToNextState(StateEnumTypes.STATE_REQUEST_OTHER);
+						}
 						hasCname = true;
 						break;
 					}
@@ -104,14 +112,29 @@ public class StateProcessRequest extends State
 	{
 		boolean retVal = false;
 		String name = contextControl.getExitString();
-		
 		// Check for end of recursion
-		for (DNSResourceRecord record : contextControl.dnsRemoteToServer.getAnswers())
+		if (contextControl.dnsRemoteToServer.getQuestions().get(0).getType() == DNS.TYPE_NS)
 		{
-			if(record.getName().equals(name) && ((record.getType() == DNS.TYPE_A)||(record.getType() == DNS.TYPE_AAAA)))
+			// Check for NS record match
+			for (DNSResourceRecord record : contextControl.dnsRemoteToServer.getAnswers())
 			{
-				retVal = true;
-				break;
+				if(record.getType() == DNS.TYPE_NS)
+				{
+					retVal = true;
+					break;
+				}
+			}
+		}
+		else
+		{
+			// Check for A/AAAA record match
+			for (DNSResourceRecord record : contextControl.dnsRemoteToServer.getAnswers())
+			{
+				if(record.getName().equals(name) && ((record.getType() == DNS.TYPE_A)||(record.getType() == DNS.TYPE_AAAA)))
+				{
+					retVal = true;
+					break;
+				}
 			}
 		}
 		return retVal;
